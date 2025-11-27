@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 1. Base de Datos PL/SQL (Oracle 18c Express Edition - ESTABLE)
+  oracle-db-stable:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    container_name: oracle-db-stable
+    restart: always
+    environment:
+      - ORACLE_PWD=MiPasswordSeguro123
+      - ORACLE_ALLOW_REMOTE=true 
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "sqlplus", "sys/MiPasswordSeguro123@localhost:1521/XEPDB1", "as", "sysdba", "SELECT 1 FROM DUAL;"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # 2. Gestor Web (ORDS Oficial) - USANDO CONN_STRING Y ORACLE_PWD
+  oracle-ords-official:
+    image: container-registry.oracle.com/database/ords:25.3.1
+    container_name: oracle-ords-official
+    restart: always
+    environment:
+      # VARIABLES REQUERIDAS POR EL MENSAJE DE ERROR:
+      # 1. Cadena de conexión simple: SYS AS SYSDBA
+      - CONN_STRING=oracle-db-stable:1521/XEPDB1
+      # 2. Contraseña del usuario que instalará ORDS (SYSTEM/SYS)
+      - ORACLE_PWD=MiPasswordSeguro123 
+      
+      # VARIABLES ADICIONALES DE CONFIGURACIÓN
+      - ORDS_PORT=8080 
+      - INSTALL_SQL_DEVELOPER_WEB=true
+      - ORDS_USER_PASSWORD=OrdsAdminPassword123 # Contraseña del usuario ORDS_PUBLIC_USER
+    ports:
+      - "8080:8080"
+    depends_on:
+      oracle-db-stable:
+        condition: service_healthy
+
+volumes:
+  oracle_data:
