@@ -121,7 +121,7 @@ Para que un nuevo usuario de base de datos pueda acceder a **SQL Developer Web**
 
 ### 1. Conexión a la Base de Datos
 
-![image-20251127103833770](/home/lll/Documents/Entorno-PL-SQL/image-20251127103833770.png)
+![terminal docker](image-20251127103833770.png)
 
 Conéctate al contenedor de base de datos usando `sqlplus` como usuario `SYS` (o `SYSTEM`):
 
